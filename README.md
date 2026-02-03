@@ -9,32 +9,98 @@
 [![ty](https://img.shields.io/badge/type--checked-ty-blue?labelColor=orange)](https://github.com/astral-sh/ty)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-yellow.svg)](https://github.com/ritwiktiwari/thrustly/blob/main/LICENSE)
 
-Typed-first Python web framework for fast, stable APIs.
+Typed-first Python web framework for fast, stable APIs. Built on [Granian](https://github.com/emmett-framework/granian) and [Pydantic](https://docs.pydantic.dev/).
 
-## Features
+> **Alpha** -- Thrustly is under active development. APIs may change between releases. Not recommended for production use yet.
 
-- Fast and modern Python toolchain using Astral's tools (uv, ruff, ty)
-- Type-safe with full type annotations
-- Comprehensive documentation with MkDocs — [View Docs](https://ritwiktiwari.github.io/thrustly/)
-
-## Installation
-
-```bash
-pip install thrustly
-```
-
-Or using uv (recommended):
+## Quick Start
 
 ```bash
 uv add thrustly
 ```
 
-## Quick Start
+```python
+from thrustly import Thrustly, Request, JSONResponse
+
+app = Thrustly()
+
+@app.get("/")
+async def index(request: Request) -> JSONResponse:
+    return JSONResponse({"message": "hello, world"})
+
+@app.get("/users/{user_id:int}")
+async def get_user(request: Request, user_id: int) -> JSONResponse:
+    return JSONResponse({"id": user_id})
+
+if __name__ == "__main__":
+    app.run()
+```
+
+## Features
+
+- **Typed path parameters** -- `{id:int}`, `{slug:str}`, `{amount:float}`, `{uid:uuid}`, `{filepath:path}`
+- **Pydantic serialization** -- return Pydantic models directly from `JSONResponse`
+- **Sync and async handlers** -- sync handlers run in a thread executor automatically
+- **Strict mode** -- validates handler return type annotations at registration time
+- **Middleware** -- standard ASGI middleware wrapping
+- **Granian server** -- built-in `app.run()` for development, or use Granian directly in production
+
+## Handlers
+
+Handlers receive a `Request` object and any matched path parameters as keyword arguments:
 
 ```python
-import thrustly
+@app.post("/items")
+async def create_item(request: Request) -> JSONResponse:
+    data = await request.json()
+    return JSONResponse(data, status_code=201)
+```
 
-print(thrustly.__version__)
+Sync handlers work too -- they're offloaded to a thread pool so they don't block the event loop:
+
+```python
+@app.get("/sync")
+def health(request: Request) -> JSONResponse:
+    return JSONResponse({"status": "ok"})
+```
+
+Return dicts or lists directly and they'll be serialized as JSON:
+
+```python
+@app.get("/simple")
+async def simple(request: Request) -> dict:
+    return {"works": True}
+```
+
+## Strict Mode
+
+Catch handler signature mistakes at import time instead of at request time:
+
+```python
+app = Thrustly(strict=True)
+
+@app.get("/x")
+def bad(request: Request) -> dict:  # TypeError -- must return Response or subclass
+    return {}
+```
+
+## Middleware
+
+Standard ASGI middleware pattern -- a function that takes an app and returns an app:
+
+```python
+def add_cors(inner_app):
+    async def middleware(scope, receive, send):
+        async def custom_send(message):
+            if message["type"] == "http.response.start":
+                headers = list(message.get("headers", []))
+                headers.append((b"access-control-allow-origin", b"*"))
+                message = {**message, "headers": headers}
+            await send(message)
+        await inner_app(scope, receive, custom_send)
+    return middleware
+
+app.add_middleware(add_cors)
 ```
 
 ## Development
@@ -72,13 +138,6 @@ make verify
 
 # Auto-fix lint and format issues
 make fix
-```
-
-### Prek
-
-```bash
-prek install
-prek run --all-files
 ```
 
 ### Documentation

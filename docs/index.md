@@ -1,73 +1,59 @@
 # thrustly
 
-Typed-first Python web framework for fast, stable APIs.
+Typed-first Python web framework for fast, stable APIs. Built on [Granian](https://github.com/emmett-framework/granian) and [Pydantic](https://docs.pydantic.dev/).
+
+!!! warning "Alpha"
+    Thrustly is under active development. APIs may change between releases. Not recommended for production use yet.
 
 ## Installation
-
-Install using pip:
-
-```bash
-pip install thrustly
-```
-
-Or using uv (recommended):
 
 ```bash
 uv add thrustly
 ```
 
+Or with pip:
+
+```bash
+pip install thrustly
+```
+
 ## Quick Start
 
+Create a file called `app.py`:
+
 ```python
-import thrustly
+from thrustly import Thrustly, Request, JSONResponse
 
-print(thrustly.__version__)
+app = Thrustly()
+
+@app.get("/")
+async def index(request: Request) -> JSONResponse:
+    return JSONResponse({"message": "hello, world"})
+
+@app.get("/users/{user_id:int}")
+async def get_user(request: Request, user_id: int) -> JSONResponse:
+    return JSONResponse({"id": user_id})
+
+if __name__ == "__main__":
+    app.run()
 ```
 
-## Development
-
-### Prerequisites
-
-- Python 3.12+
-- [uv](https://docs.astral.sh/uv/) for package management
-
-### Setup
-
-Clone the repository and install dependencies:
+Run it:
 
 ```bash
-git clone https://github.com/ritwiktiwari/thrustly.git
-cd thrustly
-uv sync --group dev
+python app.py
 ```
 
-### Running Tests
+The server starts on `http://127.0.0.1:8000`. Hit `GET /users/42` and you'll get `{"id": 42}`.
+
+For production, run with Granian directly:
 
 ```bash
-uv run pytest
+granian --interface asgi app:app
 ```
 
-### Code Quality
+## What's Next
 
-```bash
-# Lint
-uv run ruff check .
-
-# Format
-uv run ruff format .
-
-# Type check
-uv run ty check
-```
-
-### Prek Hooks
-
-Install prek hooks:
-
-```bash
-prek install
-```
-
-## License
-
-This project is licensed under the Apache-2.0 License - see the [LICENSE](https://github.com/ritwiktiwari/thrustly/blob/main/LICENSE) file for details.
+- [User Guide](guide.md) -- routing, requests, responses, middleware, strict mode
+- [API Reference](api.md) -- full class and function documentation
+- [Contributing](contributing.md) -- development setup and workflow
