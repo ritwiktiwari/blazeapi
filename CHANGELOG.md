@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial project structure
-- Basic package setup with thrustly
+- Basic package setup with BlazeAPI
 - Documentation with MkDocs
 - GitHub Actions CI/CD pipelines
 - Prek hooks for code quality

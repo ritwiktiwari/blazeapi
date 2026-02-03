@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
-    from thrustly._types import Send
+    from blazeapi._types import Send
 
 
 class Response:

@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/thrustly
+      url: https://pypi.org/p/blazeapi
     steps:
       - name: Download distributions
         uses: actions/download-artifact@v4

@@ -2,7 +2,7 @@
 
 ## Application
 
-::: thrustly.app.Thrustly
+::: blazeapi.app.BlazeAPI
     options:
       show_root_heading: true
       show_source: true
@@ -10,7 +10,7 @@
 
 ## Request
 
-::: thrustly.request.Request
+::: blazeapi.request.Request
     options:
       show_root_heading: true
       show_source: true
@@ -18,13 +18,13 @@
 
 ## Responses
 
-::: thrustly.response.Response
+::: blazeapi.response.Response
     options:
       show_root_heading: true
       show_source: true
       members_order: source
 
-::: thrustly.response.JSONResponse
+::: blazeapi.response.JSONResponse
     options:
       show_root_heading: true
       show_source: true
@@ -32,13 +32,13 @@
 
 ## Routing
 
-::: thrustly.routing.Route
+::: blazeapi.routing.Route
     options:
       show_root_heading: true
       show_source: true
       members_order: source
 
-::: thrustly.routing.Router
+::: blazeapi.routing.Router
     options:
       show_root_heading: true
       show_source: true

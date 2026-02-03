@@ -1,14 +1,14 @@
-# Contributing to thrustly
+# Contributing to BlazeAPI
 
-Thank you for your interest in contributing to thrustly!
+Thank you for your interest in contributing to BlazeAPI!
 
 ## Development Setup
 
 1. Fork and clone the repository:
 
    ```bash
-   git clone https://github.com/ritwiktiwari/thrustly.git
-   cd thrustly
+   git clone https://github.com/ritwiktiwari/blaze.git
+   cd blaze
    ```
 
 2. Install dependencies using uv:

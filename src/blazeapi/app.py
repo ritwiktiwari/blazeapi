@@ -1,4 +1,4 @@
-"""Thrustly ASGI application."""
+"""BlazeAPI ASGI application."""
 
 from __future__ import annotations
 
@@ -6,14 +6,14 @@ import asyncio
 import inspect
 from typing import TYPE_CHECKING, Any, get_type_hints
 
-from thrustly.request import Request
-from thrustly.response import JSONResponse, Response
-from thrustly.routing import Router
+from blazeapi.request import Request
+from blazeapi.response import JSONResponse, Response
+from blazeapi.routing import Router
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from thrustly._types import ASGIApp, Receive, Scope, Send
+    from blazeapi._types import ASGIApp, Receive, Scope, Send
 
 
 class _HandlerMeta:
@@ -29,7 +29,7 @@ class _HandlerMeta:
         self.param_names = frozenset(sig.parameters.keys()) - {"request"}
 
 
-class Thrustly:
+class BlazeAPI:
     """ASGI 3.0 web application.
 
     Parameters

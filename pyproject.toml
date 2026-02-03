@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "thrustly"
+name = "blazeapi"
 version = "0.1.1"
-description = "Typed-first Python web framework for fast, stable APIs."
+description = "Typed-first Python web framework for blazingly fast, stable APIs."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.12"
@@ -48,11 +48,11 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ritwiktiwari/thrustly"
-Documentation = "https://ritwiktiwari.github.io/thrustly"
-Repository = "https://github.com/ritwiktiwari/thrustly"
-Issues = "https://github.com/ritwiktiwari/thrustly/issues"
-Changelog = "https://github.com/ritwiktiwari/thrustly/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/ritwiktiwari/blaze"
+Documentation = "https://ritwiktiwari.github.io/blaze"
+Repository = "https://github.com/ritwiktiwari/blaze"
+Issues = "https://github.com/ritwiktiwari/blaze/issues"
+Changelog = "https://github.com/ritwiktiwari/blaze/blob/main/CHANGELOG.md"
 
 # =============================================================================
 # Hatch
@@ -64,7 +64,7 @@ include = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/thrustly"]
+packages = ["src/blazeapi"]
 
 # Matrix testing across Python versions
 [tool.hatch.envs.test]
@@ -99,7 +99,7 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["thrustly"]
+known-first-party = ["blazeapi"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ARG001"]
@@ -134,7 +134,7 @@ markers = [
 # =============================================================================
 
 [tool.coverage.run]
-source = ["src/thrustly"]
+source = ["src/blazeapi"]
 branch = true
 parallel = true
 

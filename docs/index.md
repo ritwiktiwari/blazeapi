@@ -1,20 +1,20 @@
-# thrustly
+# BlazeAPI
 
-Typed-first Python web framework for fast, stable APIs. Built on [Granian](https://github.com/emmett-framework/granian) and [Pydantic](https://docs.pydantic.dev/).
+**BlazeAPI** — Typed-first Python web framework for blazingly fast, stable APIs. Built on [Granian](https://github.com/emmett-framework/granian) and [Pydantic](https://docs.pydantic.dev/).
 
 !!! warning "Alpha"
-    Thrustly is under active development. APIs may change between releases. Not recommended for production use yet.
+    BlazeAPI is under active development. APIs may change between releases. Not recommended for production use yet.
 
 ## Installation
 
 ```bash
-uv add thrustly
+uv add blazeapi
 ```
 
 Or with pip:
 
 ```bash
-pip install thrustly
+pip install blazeapi
 ```
 
 ## Quick Start
@@ -22,9 +22,9 @@ pip install thrustly
 Create a file called `app.py`:
 
 ```python
-from thrustly import Thrustly, Request, JSONResponse
+from blazeapi import BlazeAPI, Request, JSONResponse
 
-app = Thrustly()
+app = BlazeAPI()
 
 @app.get("/")
 async def index(request: Request) -> JSONResponse:

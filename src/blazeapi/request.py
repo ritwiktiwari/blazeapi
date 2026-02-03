@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs
 
 if TYPE_CHECKING:
-    from thrustly._types import Receive, Scope
+    from blazeapi._types import Receive, Scope
 
 
 class Request:

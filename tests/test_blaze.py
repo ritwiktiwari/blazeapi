@@ -1,4 +1,4 @@
-"""Tests for thrustly."""
+"""Tests for BlazeAPI."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from pydantic import BaseModel
 
-from thrustly import JSONResponse, Request, Response, Thrustly, __version__
-from thrustly.routing import Route, Router
+from blazeapi import BlazeAPI, JSONResponse, Request, Response, __version__
+from blazeapi.routing import Route, Router
 
 # =====================================================================
 # Version
@@ -92,7 +92,7 @@ class TestRouter:
 # =====================================================================
 
 
-def _make_client(app: Thrustly) -> AsyncClient:
+def _make_client(app: BlazeAPI) -> AsyncClient:
     return AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test",
@@ -101,7 +101,7 @@ def _make_client(app: Thrustly) -> AsyncClient:
 
 @pytest.mark.asyncio
 async def test_simple_get() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     @app.get("/hello")
     async def hello(request: Request) -> JSONResponse:
@@ -115,7 +115,7 @@ async def test_simple_get() -> None:
 
 @pytest.mark.asyncio
 async def test_path_params() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     @app.get("/users/{user_id:int}")
     async def get_user(request: Request, user_id: int) -> JSONResponse:
@@ -129,7 +129,7 @@ async def test_path_params() -> None:
 
 @pytest.mark.asyncio
 async def test_404() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     async with _make_client(app) as client:
         resp = await client.get("/nope")
@@ -139,7 +139,7 @@ async def test_404() -> None:
 
 @pytest.mark.asyncio
 async def test_500_on_handler_error() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     @app.get("/boom")
     async def boom(request: Request) -> Response:
@@ -153,7 +153,7 @@ async def test_500_on_handler_error() -> None:
 
 @pytest.mark.asyncio
 async def test_sync_handler() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     @app.get("/sync")
     def sync_handler(request: Request) -> JSONResponse:
@@ -167,7 +167,7 @@ async def test_sync_handler() -> None:
 
 @pytest.mark.asyncio
 async def test_dict_return_auto_json() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     @app.get("/auto")
     async def auto(request: Request) -> dict:
@@ -181,7 +181,7 @@ async def test_dict_return_auto_json() -> None:
 
 @pytest.mark.asyncio
 async def test_post_with_body() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     @app.post("/echo")
     async def echo(request: Request) -> JSONResponse:
@@ -200,7 +200,7 @@ async def test_pydantic_model_response() -> None:
         name: str
         price: float
 
-    app = Thrustly()
+    app = BlazeAPI()
 
     @app.get("/item")
     async def get_item(request: Request) -> JSONResponse:
@@ -218,7 +218,7 @@ async def test_pydantic_model_response() -> None:
 
 
 def test_strict_mode_rejects_missing_annotation() -> None:
-    app = Thrustly(strict=True)
+    app = BlazeAPI(strict=True)
 
     with pytest.raises(TypeError, match="return type annotation"):
 
@@ -228,7 +228,7 @@ def test_strict_mode_rejects_missing_annotation() -> None:
 
 
 def test_strict_mode_rejects_wrong_return_type() -> None:
-    app = Thrustly(strict=True)
+    app = BlazeAPI(strict=True)
 
     with pytest.raises(TypeError, match="must be Response"):
 
@@ -238,7 +238,7 @@ def test_strict_mode_rejects_wrong_return_type() -> None:
 
 
 def test_strict_mode_accepts_response_subclass() -> None:
-    app = Thrustly(strict=True)
+    app = BlazeAPI(strict=True)
 
     @app.get("/x")
     def ok(request: Request) -> JSONResponse:
@@ -254,7 +254,7 @@ def test_strict_mode_accepts_response_subclass() -> None:
 
 @pytest.mark.asyncio
 async def test_middleware() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     @app.get("/mw")
     async def handler(request: Request) -> JSONResponse:
@@ -288,7 +288,7 @@ async def test_middleware() -> None:
 
 @pytest.mark.asyncio
 async def test_all_http_methods() -> None:
-    app = Thrustly()
+    app = BlazeAPI()
 
     for method_name in ("get", "post", "put", "delete", "patch", "options", "head"):
         decorator = getattr(app, method_name)

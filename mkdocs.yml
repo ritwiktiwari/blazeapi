@@ -1,8 +1,8 @@
-site_name: thrustly
-site_description: Typed-first Python web framework for fast, stable APIs.
-site_url: https://ritwiktiwari.github.io/thrustly
-repo_url: https://github.com/ritwiktiwari/thrustly
-repo_name: ritwiktiwari/thrustly
+site_name: BlazeAPI
+site_description: Typed-first Python web framework for blazingly fast, stable APIs.
+site_url: https://ritwiktiwari.github.io/blaze
+repo_url: https://github.com/ritwiktiwari/blaze
+repo_name: ritwiktiwari/blaze
 edit_uri: edit/main/docs/
 
 theme:

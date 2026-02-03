@@ -1,28 +1,28 @@
-# thrustly
+# BlazeAPI
 
-[![CI](https://github.com/ritwiktiwari/thrustly/actions/workflows/ci.yml/badge.svg)](https://github.com/ritwiktiwari/thrustly/actions/workflows/ci.yml)
-[![PyPI version](https://img.shields.io/pypi/v/thrustly)](https://pypi.org/project/thrustly/)
-[![codecov](https://codecov.io/gh/ritwiktiwari/thrustly/branch/main/graph/badge.svg)](https://codecov.io/gh/ritwiktiwari/thrustly)
+[![CI](https://github.com/ritwiktiwari/blaze/actions/workflows/ci.yml/badge.svg)](https://github.com/ritwiktiwari/blaze/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/blazeapi)](https://pypi.org/project/blazeapi/)
+[![codecov](https://codecov.io/gh/ritwiktiwari/blaze/branch/main/graph/badge.svg)](https://codecov.io/gh/ritwiktiwari/blaze)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![ty](https://img.shields.io/badge/type--checked-ty-blue?labelColor=orange)](https://github.com/astral-sh/ty)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-yellow.svg)](https://github.com/ritwiktiwari/thrustly/blob/main/LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-yellow.svg)](https://github.com/ritwiktiwari/blaze/blob/main/LICENSE)
 
-Typed-first Python web framework for fast, stable APIs. Built on [Granian](https://github.com/emmett-framework/granian) and [Pydantic](https://docs.pydantic.dev/).
+**BlazeAPI** — Typed-first Python web framework for blazingly fast, stable APIs. Built on [Granian](https://github.com/emmett-framework/granian) and [Pydantic](https://docs.pydantic.dev/).
 
-> **Alpha** -- Thrustly is under active development. APIs may change between releases. Not recommended for production use yet.
+> **Alpha** -- BlazeAPI is under active development. APIs may change between releases. Not recommended for production use yet.
 
 ## Quick Start
 
 ```bash
-uv add thrustly
+uv add blazeapi
 ```
 
 ```python
-from thrustly import Thrustly, Request, JSONResponse
+from blazeapi import BlazeAPI, Request, JSONResponse
 
-app = Thrustly()
+app = BlazeAPI()
 
 @app.get("/")
 async def index(request: Request) -> JSONResponse:
@@ -77,7 +77,7 @@ async def simple(request: Request) -> dict:
 Catch handler signature mistakes at import time instead of at request time:
 
 ```python
-app = Thrustly(strict=True)
+app = BlazeAPI(strict=True)
 
 @app.get("/x")
 def bad(request: Request) -> dict:  # TypeError -- must return Response or subclass
@@ -113,8 +113,8 @@ app.add_middleware(add_cors)
 ### Setup
 
 ```bash
-git clone https://github.com/ritwiktiwari/thrustly.git
-cd thrustly
+git clone https://github.com/ritwiktiwari/blaze.git
+cd blaze
 make install
 ```
 

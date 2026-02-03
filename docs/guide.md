@@ -2,12 +2,12 @@
 
 ## Routing
 
-Register handlers with decorator methods on the `Thrustly` app. All standard HTTP methods are supported: `get`, `post`, `put`, `delete`, `patch`, `options`, `head`.
+Register handlers with decorator methods on the `BlazeAPI` app. All standard HTTP methods are supported: `get`, `post`, `put`, `delete`, `patch`, `options`, `head`.
 
 ```python
-from thrustly import Thrustly, Request, JSONResponse
+from blazeapi import BlazeAPI, Request, JSONResponse
 
-app = Thrustly()
+app = BlazeAPI()
 
 @app.get("/items")
 async def list_items(request: Request) -> JSONResponse:
@@ -75,7 +75,7 @@ The body is read once and cached. Subsequent calls to `body()` or `json()` retur
 Plain response with explicit body bytes:
 
 ```python
-from thrustly import Response
+from blazeapi import Response
 
 @app.get("/text")
 async def text(request: Request) -> Response:
@@ -97,7 +97,7 @@ Serializes dicts, lists, and Pydantic models to JSON:
 
 ```python
 from pydantic import BaseModel
-from thrustly import JSONResponse
+from blazeapi import JSONResponse
 
 class User(BaseModel):
     id: int
@@ -139,7 +139,7 @@ def slow(request: Request) -> JSONResponse:
 Enable strict mode to validate handler return type annotations at registration time:
 
 ```python
-app = Thrustly(strict=True)
+app = BlazeAPI(strict=True)
 
 # This raises TypeError immediately at decoration time:
 @app.get("/bad")
@@ -162,7 +162,7 @@ Strict mode requires:
 Enable debug mode to include tracebacks in 500 error responses:
 
 ```python
-app = Thrustly(debug=True)
+app = BlazeAPI(debug=True)
 ```
 
 When `debug=False` (the default), 500 responses only return `{"detail": "Internal Server Error"}` with no traceback information.
