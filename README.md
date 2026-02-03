@@ -1,13 +1,13 @@
 # BlazeAPI
 
-[![CI](https://github.com/ritwiktiwari/blaze/actions/workflows/ci.yml/badge.svg)](https://github.com/ritwiktiwari/blaze/actions/workflows/ci.yml)
+[![CI](https://github.com/ritwiktiwari/blazeapi/actions/workflows/ci.yml/badge.svg)](https://github.com/ritwiktiwari/blazeapi/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/blazeapi)](https://pypi.org/project/blazeapi/)
-[![codecov](https://codecov.io/gh/ritwiktiwari/blaze/branch/main/graph/badge.svg)](https://codecov.io/gh/ritwiktiwari/blaze)
+[![codecov](https://codecov.io/gh/ritwiktiwari/blazeapi/branch/main/graph/badge.svg)](https://codecov.io/gh/ritwiktiwari/blazeapi)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![ty](https://img.shields.io/badge/type--checked-ty-blue?labelColor=orange)](https://github.com/astral-sh/ty)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-yellow.svg)](https://github.com/ritwiktiwari/blaze/blob/main/LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-yellow.svg)](https://github.com/ritwiktiwari/blazeapi/blob/main/LICENSE)
 
 **BlazeAPI** — Typed-first Python web framework for blazingly fast, stable APIs. Built on [Granian](https://github.com/emmett-framework/granian) and [Pydantic](https://docs.pydantic.dev/).
 
@@ -113,8 +113,8 @@ app.add_middleware(add_cors)
 ### Setup
 
 ```bash
-git clone https://github.com/ritwiktiwari/blaze.git
-cd blaze
+git clone https://github.com/ritwiktiwari/blazeapi.git
+cd blazeapi
 make install
 ```
 
