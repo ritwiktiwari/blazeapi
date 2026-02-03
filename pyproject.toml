@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "thrustly"
-version = "0.1.0"
+version = "0.1.1"
 description = "Typed-first Python web framework for fast, stable APIs."
 readme = "README.md"
 license = "Apache-2.0"
@@ -78,7 +78,7 @@ python = ["3.10", "3.11", "3.12", "3.13"]
 
 [tool.ruff]
 target-version = "py312"
-line-length = 88
+line-length = 120
 src = ["src", "tests"]
 
 [tool.ruff.lint]

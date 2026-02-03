@@ -136,9 +136,7 @@ class Thrustly:
         path_params: dict[str, Any],
     ) -> Any:
         meta = self._handler_meta[id(handler)]
-        kwargs: dict[str, Any] = {
-            name: path_params[name] for name in meta.param_names if name in path_params
-        }
+        kwargs: dict[str, Any] = {name: path_params[name] for name in meta.param_names if name in path_params}
         if meta.wants_request:
             kwargs["request"] = request
 
@@ -177,18 +175,13 @@ class Thrustly:
 
 def _validate_return_type(handler: Callable[..., Any]) -> None:
     hints = get_type_hints(handler)
+    name = getattr(handler, "__name__", repr(handler))
     ret = hints.get("return")
     if ret is None:
-        msg = (
-            f"Handler {handler.__name__!r} must have a return type "
-            f"annotation in strict mode"
-        )
+        msg = f"Handler {name!r} must have a return type annotation in strict mode"
         raise TypeError(msg)
     if not (isinstance(ret, type) and issubclass(ret, Response)):
-        msg = (
-            f"Handler {handler.__name__!r} return type must be "
-            f"Response or a subclass, got {ret!r}"
-        )
+        msg = f"Handler {name!r} return type must be Response or a subclass, got {ret!r}"
         raise TypeError(msg)
 
 

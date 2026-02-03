@@ -43,9 +43,7 @@ class Route:
         m = self._pattern.match(path)
         if m is None:
             return None
-        return {
-            name: self._converters[name](value) for name, value in m.groupdict().items()
-        }
+        return {name: self._converters[name](value) for name, value in m.groupdict().items()}
 
     def __repr__(self) -> str:
         return f"Route({self.method!r}, {self.path!r})"

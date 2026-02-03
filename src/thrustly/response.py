@@ -36,10 +36,7 @@ class Response:
             {
                 "type": "http.response.start",
                 "status": self.status_code,
-                "headers": [
-                    (k.encode("latin-1"), v.encode("latin-1"))
-                    for k, v in self.headers.items()
-                ],
+                "headers": [(k.encode("latin-1"), v.encode("latin-1")) for k, v in self.headers.items()],
             }
         )
         await _send({"type": "http.response.body", "body": self.body})

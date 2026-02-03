@@ -45,10 +45,7 @@ class Request:
     @property
     def headers(self) -> dict[str, str]:
         """Headers as a lowercase-keyed dict (last value wins for dupes)."""
-        return {
-            k.decode("latin-1"): v.decode("latin-1")
-            for k, v in self._scope.get("headers", [])
-        }
+        return {k.decode("latin-1"): v.decode("latin-1") for k, v in self._scope.get("headers", [])}
 
     async def body(self) -> bytes:
         """Read and cache the full request body."""
