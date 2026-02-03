@@ -27,7 +27,8 @@ classifiers = [
 keywords = []
 dependencies = [
     "pydantic>=2.12",
-    "granian>=2.7",
+    "granian[reload]>=2.7",
+    "typer>=0.15",
 ]
 
 [dependency-groups]
@@ -46,6 +47,9 @@ docs = [
     "mkdocs-material>=9.7.0",
     "mkdocstrings-python>=2.0.1",
 ]
+
+[project.scripts]
+blazeapi = "blazeapi.cli:app"
 
 [project.urls]
 Homepage = "https://github.com/ritwiktiwari/blaze"

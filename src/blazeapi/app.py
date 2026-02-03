@@ -1,19 +1,17 @@
 """BlazeAPI ASGI application."""
 
-from __future__ import annotations
-
 import asyncio
 import inspect
-from typing import TYPE_CHECKING, Any, get_type_hints
+import sys
+import traceback
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any, get_type_hints
 
+from blazeapi._types import ASGIApp, Receive, Scope, Send
 from blazeapi.request import Request
 from blazeapi.response import JSONResponse, Response
 from blazeapi.routing import Router
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from blazeapi._types import ASGIApp, Receive, Scope, Send
 
 
 class _HandlerMeta:
@@ -46,7 +44,8 @@ class BlazeAPI:
         self.strict = strict
         self.debug = debug
         self._middleware: list[Callable[[ASGIApp], ASGIApp]] = []
-        self._handler_meta: dict[int, _HandlerMeta] = {}
+        self._handler_meta: dict[Callable[..., Any], _HandlerMeta] = {}
+        self._app: ASGIApp | None = None
 
     # ------------------------------------------------------------------
     # Route registration
@@ -57,7 +56,7 @@ class BlazeAPI:
             if self.strict:
                 _validate_return_type(handler)
             self.router.add_route(method, path, handler)
-            self._handler_meta[id(handler)] = _HandlerMeta(handler)
+            self._handler_meta[handler] = _HandlerMeta(handler)
             return handler
 
         return decorator
@@ -93,16 +92,26 @@ class BlazeAPI:
         Called as ``middleware(app)`` and must return an ASGI callable.
         """
         self._middleware.append(middleware)
+        self._app = None  # invalidate cached chain
+
+    def _build_app(self) -> ASGIApp:
+        app: ASGIApp = self._handle
+        for mw in reversed(self._middleware):
+            app = mw(app)
+        return app
 
     # ------------------------------------------------------------------
     # ASGI interface
     # ------------------------------------------------------------------
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        app: ASGIApp = self._handle
-        for mw in reversed(self._middleware):
-            app = mw(app)
-        await app(scope, receive, send)
+        if scope["type"] == "lifespan":
+            await _handle_lifespan(receive, send)
+            return
+
+        if self._app is None:
+            self._app = self._build_app()
+        await self._app(scope, receive, send)
 
     async def _handle(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -121,8 +130,6 @@ class BlazeAPI:
         except Exception:
             body: dict[str, Any] = {"detail": "Internal Server Error"}
             if self.debug:
-                import traceback
-
                 body["traceback"] = traceback.format_exc()
             await JSONResponse(body, status_code=500).send(send)
             return
@@ -135,7 +142,7 @@ class BlazeAPI:
         request: Request,
         path_params: dict[str, Any],
     ) -> Any:
-        meta = self._handler_meta[id(handler)]
+        meta = self._handler_meta[handler]
         kwargs: dict[str, Any] = {name: path_params[name] for name in meta.param_names if name in path_params}
         if meta.wants_request:
             kwargs["request"] = request
@@ -153,24 +160,92 @@ class BlazeAPI:
         self,
         host: str = "127.0.0.1",
         port: int = 8000,
+        *,
+        dev: bool = False,
+        reload: bool | None = None,
+        workers: int = 1,
+        log_level: str = "info",
         **granian_kwargs: Any,
     ) -> None:
-        """Start the app with Granian (convenience for development)."""
-        from granian import Granian
+        """Start the app with Granian.
 
-        server = Granian(
-            target=self,
-            address=host,
+        Parameters
+        ----------
+        dev:
+            When ``True``, enables reload, debug logging, and access logs.
+        reload:
+            Auto-reload on code changes.  ``None`` follows *dev*.
+        workers:
+            Number of worker processes.
+        log_level:
+            Granian log level.
+        """
+        from blazeapi._server import serve
+
+        target = _resolve_target(self)
+        serve(
+            target,
+            host=host,
             port=port,
-            interface="asgi",
-            **granian_kwargs,
+            dev=dev,
+            reload=reload,
+            workers=workers,
+            log_level=log_level,
+            granian_kwargs=granian_kwargs or None,
         )
-        server.serve()
 
 
 # ------------------------------------------------------------------
-# Module-level helpers (no reason to be methods)
+# Module-level helpers
 # ------------------------------------------------------------------
+
+
+def _resolve_target(app: BlazeAPI) -> str:
+    """Derive a ``"module:var"`` string for the given app instance.
+
+    Searches ``__main__`` for a module-level variable whose value *is* the
+    app.  Falls back to the caller's ``__file__`` stem when running as a
+    script (``python main.py``) so Granian workers can import it.
+    """
+    main = sys.modules.get("__main__")
+    if main is None:
+        raise RuntimeError(
+            "Cannot auto-detect Granian target: __main__ module not found. "
+            "Pass an explicit target string, e.g. app.run(target='myapp:app')."
+        )
+
+    var_name: str | None = None
+    for name, val in vars(main).items():
+        if val is app:
+            var_name = name
+            break
+
+    if var_name is None:
+        raise RuntimeError(
+            "Cannot auto-detect Granian target: no module-level variable in "
+            "__main__ references this BlazeAPI instance. "
+            "Pass an explicit target string, e.g. app.run(target='myapp:app')."
+        )
+
+    spec = getattr(main, "__spec__", None)
+    module_name: str | None = spec.name if spec else None
+    if not module_name:
+        # Running as a script — use the filename stem so granian can import it.
+        main_file = getattr(main, "__file__", None)
+        module_name = Path(main_file).stem if main_file else None
+
+    return f"{module_name}:{var_name}"
+
+
+async def _handle_lifespan(receive: Receive, send: Send) -> None:
+    """Minimal lifespan responder — accept startup/shutdown with no-ops."""
+    while True:
+        message = await receive()
+        if message["type"] == "lifespan.startup":
+            await send({"type": "lifespan.startup.complete"})
+        elif message["type"] == "lifespan.shutdown":
+            await send({"type": "lifespan.shutdown.complete"})
+            return
 
 
 def _validate_return_type(handler: Callable[..., Any]) -> None:
