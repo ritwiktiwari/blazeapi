@@ -1,7 +1,7 @@
 # thrustly
 
 [![CI](https://github.com/ritwiktiwari/thrustly/actions/workflows/ci.yml/badge.svg)](https://github.com/ritwiktiwari/thrustly/actions/workflows/ci.yml)
-[![PyPI version](https://badge.fury.io/py/thrustly.svg)](https://badge.fury.io/py/thrustly)
+[![PyPI version](https://img.shields.io/pypi/v/thrustly)](https://pypi.org/project/thrustly/)
 [![codecov](https://codecov.io/gh/ritwiktiwari/thrustly/branch/main/graph/badge.svg)](https://codecov.io/gh/ritwiktiwari/thrustly)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
