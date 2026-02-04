@@ -6,7 +6,7 @@ import sys
 import traceback
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, get_type_hints
+from typing import Any
 
 from blazeapi._types import ASGIApp, Receive, Scope, Send
 from blazeapi.request import Request
@@ -54,7 +54,9 @@ class BlazeAPI:
     def _route(self, method: str, path: str) -> Callable[..., Any]:
         def decorator(handler: Callable[..., Any]) -> Callable[..., Any]:
             if self.strict:
-                _validate_return_type(handler)
+                from blazeapi.validation import validate_handler_signature
+
+                validate_handler_signature(handler, path, method)
             self.router.add_route(method, path, handler)
             self._handler_meta[handler] = _HandlerMeta(handler)
             return handler
@@ -246,18 +248,6 @@ async def _handle_lifespan(receive: Receive, send: Send) -> None:
         elif message["type"] == "lifespan.shutdown":
             await send({"type": "lifespan.shutdown.complete"})
             return
-
-
-def _validate_return_type(handler: Callable[..., Any]) -> None:
-    hints = get_type_hints(handler)
-    name = getattr(handler, "__name__", repr(handler))
-    ret = hints.get("return")
-    if ret is None:
-        msg = f"Handler {name!r} must have a return type annotation in strict mode"
-        raise TypeError(msg)
-    if not (isinstance(ret, type) and issubclass(ret, Response)):
-        msg = f"Handler {name!r} return type must be Response or a subclass, got {ret!r}"
-        raise TypeError(msg)
 
 
 async def _send_response(response: Any, send: Send) -> None:

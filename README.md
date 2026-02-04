@@ -31,9 +31,6 @@ async def index(request: Request) -> JSONResponse:
 @app.get("/users/{user_id:int}")
 async def get_user(request: Request, user_id: int) -> JSONResponse:
     return JSONResponse({"id": user_id})
-
-if __name__ == "__main__":
-    app.run()
 ```
 
 ## Features
@@ -41,9 +38,9 @@ if __name__ == "__main__":
 - **Typed path parameters** -- `{id:int}`, `{slug:str}`, `{amount:float}`, `{uid:uuid}`, `{filepath:path}`
 - **Pydantic serialization** -- return Pydantic models directly from `JSONResponse`
 - **Sync and async handlers** -- sync handlers run in a thread executor automatically
-- **Strict mode** -- validates handler return type annotations at registration time
+- **Strict mode** -- comprehensive handler signature validation at registration time
 - **Middleware** -- standard ASGI middleware wrapping
-- **Granian server** -- built-in `app.run()` for development, or use Granian directly in production
+- **CLI** -- `blazeapi dev` and `blazeapi run` commands powered by [Granian](https://github.com/emmett-framework/granian)
 
 ## Handlers
 
@@ -77,12 +74,96 @@ async def simple(request: Request) -> dict:
 Catch handler signature mistakes at import time instead of at request time:
 
 ```python
+from pydantic import BaseModel
+
 app = BlazeAPI(strict=True)
 
+class Item(BaseModel):
+    name: str
+    price: float
+
+# Return type must be Response/JSONResponse or a BaseModel subclass
 @app.get("/x")
-def bad(request: Request) -> dict:  # TypeError -- must return Response or subclass
+def bad(request: Request) -> dict:  # TypeError
     return {}
+
+# Non-path parameters must be BaseModel subclasses
+@app.post("/items")
+async def create(request: Request, item: Item) -> JSONResponse:  # OK
+    return JSONResponse(item)
+
+# Path parameters just need a type annotation
+@app.get("/users/{user_id:int}")
+async def get_user(request: Request, user_id: int) -> JSONResponse:  # OK
+    return JSONResponse({"id": user_id})
 ```
+
+Strict mode validates at route registration time:
+
+1. Every handler must have a return type annotation
+2. Return type must be a `Response` subclass or `BaseModel` subclass (not `dict`, `list`, or primitives)
+3. All parameters must have type annotations
+4. Non-path parameters must be `BaseModel` subclasses (not `dict`, `list`, or bare primitives)
+5. Path parameters (matching `{name}` in the route) may use primitive types like `int` or `str`
+
+## Running the App
+
+BlazeAPI provides a CLI with two commands: `dev` for development and `run` for production.
+
+### Development
+
+```bash
+blazeapi dev main.py
+```
+
+This starts the server on `http://127.0.0.1:8000` with auto-reload, debug logging, and access logs enabled.
+
+```bash
+# Custom host and port
+blazeapi dev main.py --host 0.0.0.0 --port 3000
+
+# Disable auto-reload
+blazeapi dev main.py --no-reload
+```
+
+#### `blazeapi dev` options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `PATH` | `main.py` | Python file or `module:var` target |
+| `--host` | `127.0.0.1` | Bind address |
+| `--port` | `8000` | Bind port |
+| `--reload` / `--no-reload` | `--reload` | Auto-reload on code changes |
+
+Dev mode automatically sets debug-level logging and enables access logs.
+
+### Production
+
+```bash
+blazeapi run main.py --host 0.0.0.0 --port 8000 --workers 4
+```
+
+Or use Granian directly for full control over threading, TLS, and other options:
+
+```bash
+granian --interface asgi --host 0.0.0.0 --port 8000 --workers 4 app:app
+```
+
+#### `blazeapi run` options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `PATH` | `main.py` | Python file or `module:var` target |
+| `--host` | `127.0.0.1` | Bind address |
+| `--port` | `8000` | Bind port |
+| `--workers` | `1` | Number of worker processes |
+
+### Target resolution
+
+The `PATH` argument accepts two forms:
+
+- **File path** -- `main.py`, `app.py`, etc. BlazeAPI auto-discovers the app instance by looking for variables named `app` or `application`, then falls back to any `BlazeAPI` instance.
+- **Module:var** -- `myapp:app`, `server:application`, etc. Used directly.
 
 ## Middleware
 
@@ -103,7 +184,7 @@ def add_cors(inner_app):
 app.add_middleware(add_cors)
 ```
 
-## Development
+## Contributing
 
 ### Prerequisites
 

@@ -136,26 +136,99 @@ def slow(request: Request) -> JSONResponse:
 
 ## Strict Mode
 
-Enable strict mode to validate handler return type annotations at registration time:
+Enable strict mode to get comprehensive handler signature validation at route registration time. This catches type errors early -- at import time rather than at request time.
 
 ```python
 app = BlazeAPI(strict=True)
+```
 
-# This raises TypeError immediately at decoration time:
+### What gets validated
+
+Strict mode enforces five rules when a handler is registered:
+
+| Rule | Requirement | Allowed | Rejected |
+|------|-------------|---------|----------|
+| 1 | Return type annotation exists | Any annotation | Missing annotation |
+| 2 | Return type is structured | `BaseModel` subclass, `Response` subclass | `dict`, `list`, primitives |
+| 3 | All parameters are typed | Any type annotation | Missing annotation |
+| 4 | Non-path parameters are models | `BaseModel` subclass | `dict`, `list`, primitives |
+| 5 | Path parameters have types | Primitives OK (`int`, `str`, etc.) | Missing annotation |
+
+### Examples
+
+```python
+from pydantic import BaseModel
+from blazeapi import BlazeAPI, Request, JSONResponse
+
+app = BlazeAPI(strict=True)
+
+class CreateItemRequest(BaseModel):
+    name: str
+    price: float
+
+class QueryParams(BaseModel):
+    page: int
+    size: int
+```
+
+**Return types** -- must be `Response`/`JSONResponse` or a `BaseModel` subclass:
+
+```python
+# TypeError -- dict is not allowed
 @app.get("/bad")
-def bad(request: Request) -> dict:  # not a Response subclass
+def bad(request: Request) -> dict:
     return {}
 
-# This is fine:
+# OK -- JSONResponse is a Response subclass
 @app.get("/good")
 def good(request: Request) -> JSONResponse:
     return JSONResponse({})
+
+# OK -- BaseModel subclass as return type
+@app.get("/also-good")
+def also_good(request: Request) -> CreateItemRequest:
+    return CreateItemRequest(name="Widget", price=9.99)
 ```
 
-Strict mode requires:
+**Path parameters** -- just need a type annotation, primitives are fine:
 
-1. A return type annotation on every handler
-2. The annotation must be `Response` or a subclass (e.g. `JSONResponse`)
+```python
+# OK -- user_id matches {user_id} in the path, so int is allowed
+@app.get("/users/{user_id:int}")
+async def get_user(request: Request, user_id: int) -> JSONResponse:
+    return JSONResponse({"id": user_id})
+```
+
+**Non-path parameters** -- must be `BaseModel` subclasses:
+
+```python
+# TypeError -- page: int is not in the path, so it must be a BaseModel
+@app.get("/items")
+async def list_items(request: Request, page: int) -> JSONResponse:
+    ...
+
+# OK -- wrap query params in a model
+@app.get("/items")
+async def list_items(request: Request, query: QueryParams) -> JSONResponse:
+    return JSONResponse({"page": query.page})
+
+# OK -- body parameter as a model
+@app.post("/items")
+async def create_item(request: Request, item: CreateItemRequest) -> JSONResponse:
+    return JSONResponse(item)
+```
+
+### Error messages
+
+Strict mode errors are detailed and actionable:
+
+```
+Strict-mode violation in handler 'list_items' [GET /items]
+  Current: page: int
+  Problem: Non-path parameter 'page' must be a BaseModel subclass.
+  Fix:     Wrap 'page' fields in a Pydantic model, e.g. page: PageModel.
+  Rejected types: dict, list, str, int, and other primitives.
+```
 
 ## Debug Mode
 
@@ -195,19 +268,70 @@ Middleware is applied in reverse registration order (last registered wraps outer
 
 ## Running
 
+BlazeAPI provides a CLI with two commands: `blazeapi dev` for development and `blazeapi run` for production. Both are powered by [Granian](https://github.com/emmett-framework/granian).
+
 ### Development
 
-Use the built-in `run()` method:
-
-```python
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+```bash
+blazeapi dev main.py
 ```
+
+This starts the server on `http://127.0.0.1:8000` with auto-reload, debug-level logging, and access logs enabled. The server automatically restarts when you change your code.
+
+```bash
+# Custom host and port
+blazeapi dev main.py --host 0.0.0.0 --port 3000
+
+# Disable auto-reload
+blazeapi dev main.py --no-reload
+```
+
+#### `blazeapi dev` options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `PATH` | `main.py` | Python file or `module:var` target |
+| `--host` | `127.0.0.1` | Bind address |
+| `--port` | `8000` | Bind port |
+| `--reload` / `--no-reload` | `--reload` | Auto-reload on code changes |
+
+Dev mode automatically sets debug-level logging and enables access logs.
 
 ### Production
 
-Use Granian directly for more control over workers, threading, and TLS:
+```bash
+blazeapi run main.py --host 0.0.0.0 --port 8000 --workers 4
+```
+
+#### `blazeapi run` options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `PATH` | `main.py` | Python file or `module:var` target |
+| `--host` | `127.0.0.1` | Bind address. Use `0.0.0.0` to accept external connections. |
+| `--port` | `8000` | Bind port |
+| `--workers` | `1` | Number of worker processes |
+
+For full control over threading, TLS, backpressure, and other Granian options, use Granian directly:
 
 ```bash
 granian --interface asgi --host 0.0.0.0 --port 8000 --workers 4 app:app
 ```
+
+### Target resolution
+
+The `PATH` argument accepts two forms:
+
+- **File path** -- `main.py`, `app.py`, etc. BlazeAPI auto-discovers the app instance by looking for variables named `app` or `application`, then falls back to any `BlazeAPI` instance found in the module.
+- **Module:var** -- `myapp:app`, `server:application`, etc. Used directly as the Granian target.
+
+### Programmatic usage
+
+You can also start the server from Python with `app.run()`:
+
+```python
+if __name__ == "__main__":
+    app.run(dev=True)
+```
+
+`app.run()` accepts the same options: `host`, `port`, `dev`, `reload`, `workers`, `log_level`, and any extra keyword arguments are passed through to Granian.

@@ -30,6 +30,13 @@
       show_source: true
       members_order: source
 
+## Validation
+
+::: blazeapi.validation.validate_handler_signature
+    options:
+      show_root_heading: true
+      show_source: true
+
 ## Routing
 
 ::: blazeapi.routing.Route

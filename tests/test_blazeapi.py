@@ -220,7 +220,7 @@ async def test_pydantic_model_response() -> None:
 def test_strict_mode_rejects_missing_annotation() -> None:
     app = BlazeAPI(strict=True)
 
-    with pytest.raises(TypeError, match="return type annotation"):
+    with pytest.raises(TypeError, match="Missing return type annotation"):
 
         @app.get("/x")
         def no_annotation(request: Request):
@@ -230,7 +230,7 @@ def test_strict_mode_rejects_missing_annotation() -> None:
 def test_strict_mode_rejects_wrong_return_type() -> None:
     app = BlazeAPI(strict=True)
 
-    with pytest.raises(TypeError, match="must be Response"):
+    with pytest.raises(TypeError, match="must be a Response subclass or BaseModel subclass"):
 
         @app.get("/x")
         def wrong_type(request: Request) -> dict:
